@@ -19,7 +19,7 @@ func InitDb()  (db *gorm.DB, err error) {
 
 
 
-	db.AutoMigrate(&model.Task{})
+	db.AutoMigrate(&model.User{} , &model.Task{})
 
 	return db , nil
 }
