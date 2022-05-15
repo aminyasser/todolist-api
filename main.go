@@ -14,7 +14,9 @@ var (
 
 	authRepo = repository.NewUserRepository(db)
 	authService = service.NewAuthService(authRepo)
-	auth = controller.NewAuthController(authService)
+	jwtService = service.NewJWTService()
+
+	auth = controller.NewAuthController(authService , jwtService)
 )
 
 func main() {

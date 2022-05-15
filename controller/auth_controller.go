@@ -2,6 +2,7 @@ package controller
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/aminyasser/todo-list/entity/model"
 	"github.com/aminyasser/todo-list/service"
@@ -16,10 +17,11 @@ type AuthController interface {
 
 type authController struct {
 	authService service.AuthService
+	jwtService service.JWTService
 }
 
-func NewAuthController(authService service.AuthService) *authController {
-     return &authController{authService}
+func NewAuthController(authService service.AuthService , jwtService service.JWTService) *authController {
+     return &authController{authService , jwtService}
 }
 
 func (auth *authController) Login(ctx *gin.Context) {
@@ -45,6 +47,8 @@ func (auth *authController) Register(ctx *gin.Context) {
 			return
 		}
 
+		token := auth.jwtService.GenerateToken(strconv.FormatUint(uint64(createdUser.ID), 10))
+		createdUser.Token = token
 		response := gin.H{
 			"message": "user registerd successfully",
 			"user": createdUser,
