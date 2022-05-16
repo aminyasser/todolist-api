@@ -11,6 +11,7 @@ import (
 type UserRepository interface {
 FindBy(string , string) (model.User, error)
 Insert( model.User) model.User
+Update( model.User) model.User
 Exists( string) bool
 }
 
@@ -35,6 +36,11 @@ func (auth *userRepository) FindBy(colm string , value string) (model.User, erro
 func (auth *userRepository) Insert(user model.User) model.User {
 	user.Password = hashPassword([]byte(user.Password))
     auth.connection.Create(&user)
+	return user
+}
+
+func (auth *userRepository) Update(user model.User) model.User {
+	auth.connection.Where("id = ?", user.ID).Updates(&user)
 	return user
 }
 

@@ -25,7 +25,6 @@ func JWT(jwtService service.JWTService) gin.HandlerFunc {
 		if token.Valid {
 			claims := token.Claims.(jwt.MapClaims)
 			log.Println("Claim[user_id]: ", claims["user_id"])
-			log.Println("Claim[issuer] :", claims["issuer"])
 		} else {
 			response := response.Error("Your token is not valid")
 			c.AbortWithStatusJSON(http.StatusUnauthorized, response)

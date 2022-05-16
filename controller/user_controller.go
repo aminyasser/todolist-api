@@ -2,7 +2,10 @@ package controller
 
 import (
 	"fmt"
+	"net/http"
+	"strconv"
 
+	"github.com/aminyasser/todo-list/entity/request"
 	"github.com/aminyasser/todo-list/entity/response"
 	"github.com/aminyasser/todo-list/service"
 	"github.com/dgrijalva/jwt-go"
@@ -43,5 +46,24 @@ func (user *userController) Profile(ctx *gin.Context) {
 }
 
 func (user *userController) Update(ctx *gin.Context) {
-	
+	var profile request.ProfileUpdate
+	err := ctx.ShouldBindJSON(&profile)
+	if err != nil {
+		response := response.Error(err.Error())
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, response)
+		return
+	}
+	id := user.getIdFromHeader(ctx)
+    userId , _ := strconv.Atoi(id)
+	profile.ID = uint(userId)
+	updated, err := user.userService.UpdateUser(profile)
+	fmt.Println(updated)
+	if err != nil {
+		response := response.Error(err.Error())
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, response)
+		return
+	}
+
+	response := response.Success("user updated successfully" , updated)
+	ctx.JSON(200 , response)
 }
