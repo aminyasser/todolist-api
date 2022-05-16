@@ -18,7 +18,8 @@ var (
 	authService = service.NewAuthService(userRepo)
 	userService = service.NewUserService(userRepo)
 	jwtService = service.NewJWTService()
-
+    
+	// controllers
 	auth = controller.NewAuthController(authService , jwtService)
 	user = controller.NewUserController(userService , jwtService)
 
@@ -35,7 +36,7 @@ func main() {
 		authRoutes.POST("/register", auth.Register)
 	}
     
-	profileRoutes := route.Group("/api" , middleware.AuthorizeJWT(jwtService)) 
+	profileRoutes := route.Group("/api" , middleware.JWT(jwtService)) 
 	{
 		profileRoutes.GET("/profile" , user.Profile )
 		profileRoutes.POST("/profile" , user.Update )

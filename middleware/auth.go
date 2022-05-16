@@ -10,8 +10,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-//AuthorizeJWT validates the token user given, return 401 if not valid
-func AuthorizeJWT(jwtService service.JWTService) gin.HandlerFunc {
+//JWT validates the token user 
+func JWT(jwtService service.JWTService) gin.HandlerFunc {
 
 	return func(c *gin.Context) {
 		authHeader := c.GetHeader("Authorization")
