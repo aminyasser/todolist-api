@@ -46,7 +46,7 @@ func (auth *authController) Login(ctx *gin.Context) {
 	user.Token = token
 		
 	response := response.Success("user login successfully", user)
-	ctx.JSON(http.StatusCreated, response)
+	ctx.JSON(200, response)
 
 }
 

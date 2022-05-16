@@ -34,7 +34,7 @@ func (auth *userRepository) FindBy(colm string , value string) (model.User, erro
 
 func (auth *userRepository) Insert(user model.User) model.User {
 	user.Password = hashPassword([]byte(user.Password))
-     auth.connection.Create(&user)
+    auth.connection.Create(&user)
 	return user
 }
 
