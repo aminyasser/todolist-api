@@ -7,5 +7,5 @@ type User struct {
 	Name string  `json:"name" bindding:"required"`
 	Email string  `json:"email" bindding:"required"`
 	Password string  `json:"password" bindding:"required"`
-	Token string  `json:"token" bindding:"required"`
+	Tasks []Task
 }

@@ -11,18 +11,19 @@ import (
 
 var (
 	db , _ = database.InitDb()
-	task = controller.NewTaskController(db)
+	
     // repositories
 	userRepo = repository.NewUserRepository(db)
+	taskRepo = repository.NewTaskRepository(db)
 	// services
 	authService = service.NewAuthService(userRepo)
 	userService = service.NewUserService(userRepo)
+	taskService = service.NewTaskService(taskRepo)
 	jwtService = service.NewJWTService()
-    
 	// controllers
 	auth = controller.NewAuthController(authService , jwtService)
 	user = controller.NewUserController(userService , jwtService)
-
+	task = controller.NewTaskController(taskService , jwtService)
 )
 
 func main() {
@@ -42,14 +43,14 @@ func main() {
 		profileRoutes.POST("/profile" , user.Update )
 	}
 
-    taskRoutes := route.Group("/api")
+    taskRoutes := route.Group("/api" , middleware.JWT(jwtService))
 	{
-		taskRoutes.GET("/tasks", task.GetAll)
-		taskRoutes.GET("/tasks/:id", task.Get)
-		taskRoutes.POST("/tasks", task.Create)
-		taskRoutes.PATCH("/tasks/:id", task.Update)
-		taskRoutes.DELETE("/tasks/:id", task.Delete)
+		taskRoutes.GET("/tasks", task.Index)
+		taskRoutes.GET("/tasks/:id", task.Show)
+		// taskRoutes.POST("/tasks", task.Create)
+		// taskRoutes.PATCH("/tasks/:id", task.Update)
+		// taskRoutes.DELETE("/tasks/:id", task.Destroy)
 	}
 
-	route.Run() // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
+	route.Run() // listen and serve on 0.0.0.0:8080 
 }
