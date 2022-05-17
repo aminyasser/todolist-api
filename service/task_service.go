@@ -1,6 +1,7 @@
 package service
 
 import (
+	"errors"
 	"strconv"
 
 	"github.com/aminyasser/todo-list/entity/model"
@@ -14,6 +15,8 @@ type TaskService interface {
 	GetAll(string) (*[]response.Task, error)
 	Get(string) (*response.Task, error)
 	CreateTask( request.Task ,  string) (*response.Task, error) 
+	UpdateTask( request.UpdateTask ,  string) (*response.Task, error)
+	DeleteTask( string ,  string) error
 }
 type taskService struct {
 	repository repository.TaskRepository
@@ -52,8 +55,45 @@ func (task *taskService) CreateTask(taskReq request.Task , userId string) (*resp
    
     taskModel.UserId , _ = strconv.Atoi(userId)
 
-	updatedTask , _ := task.repository.Insert(taskModel)
+	createdTask , _ := task.repository.Insert(taskModel)
+
+	res := response.NewTaskResponse(createdTask)
+	return &res, nil
+}
+
+func (task *taskService) UpdateTask(taskReq request.UpdateTask , userId string) (*response.Task, error) {
+	
+	taskCheck , _ := task.repository.FindBy("id" , strconv.Itoa(int(taskReq.ID)))
+	if strconv.Itoa(taskCheck.UserId) != userId {
+		return nil, errors.New("you can't update someone else task")
+	}
+
+	taskModel := model.Task{}
+	err := smapping.FillStruct(&taskModel, smapping.MapFields(&taskReq))
+	taskModel.ID = taskReq.ID
+	if err != nil {
+		return nil, err
+	}
+	
+    taskModel.UserId , _ = strconv.Atoi(userId)
+
+	updatedTask := task.repository.Update(taskModel)
 
 	res := response.NewTaskResponse(updatedTask)
 	return &res, nil
 }
+
+func (task *taskService) DeleteTask(id string , userId string) error {
+	taskCheck , _ := task.repository.FindBy("id" , id)
+	if strconv.Itoa(taskCheck.UserId) != userId {
+		return errors.New("you can't delete someone else task")
+	}
+
+	err := task.repository.Delete(id)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+

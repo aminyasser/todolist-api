@@ -48,8 +48,8 @@ func main() {
 		taskRoutes.GET("/tasks", task.Index)
 		taskRoutes.GET("/tasks/:id", task.Show)
 		taskRoutes.POST("/tasks", task.Create)
-		// taskRoutes.PATCH("/tasks/:id", task.Update)
-		// taskRoutes.DELETE("/tasks/:id", task.Destroy)
+		taskRoutes.PATCH("/tasks/:id", task.Update)
+		taskRoutes.DELETE("/tasks/:id", task.Destroy)
 	}
 
 	route.Run() // listen and serve on 0.0.0.0:8080 

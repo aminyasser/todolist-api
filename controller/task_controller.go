@@ -3,8 +3,8 @@ package controller
 import (
 	"fmt"
 	"net/http"
+	"strconv"
 
-	
 	"github.com/aminyasser/todo-list/entity/request"
 	"github.com/aminyasser/todo-list/entity/response"
 	"github.com/aminyasser/todo-list/service"
@@ -71,35 +71,46 @@ func (t *taskController) Create(c *gin.Context) {
 	}
 }
 
-// func (t *taskController) Update(c *gin.Context) {
-// 	id := c.Param("id")
-// 	var task response.Task
-//     err := c.ShouldBindJSON(&task)
-// 	if err != nil {
-// 		c.JSON(http.StatusBadRequest, gin.H{"error" : err.Error()})
-// 	} else {
-//        t.connection.Model(&model.Task{}).Where("id = ?", id).Updates(model.Task{Body: task.Body , Completed: task.Completed })
-// 		c.JSON(200, gin.H{
-// 			"message": "Task updated successfully",
-// 			"task": task,
-// 		})
-// 	}
+func (t *taskController) Update(c *gin.Context) {
+	id := c.Param("id")
+	var task request.UpdateTask
+    err := c.ShouldBindJSON(&task)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error" : err.Error()})
+	} else {
+		taskId , _ := strconv.Atoi(id)
+        task.ID = uint(taskId)
+        
+		userId := t.getIdFromHeader(c)
+		res , err := t.taskService.UpdateTask(task , userId)
+		if err != nil {
+			response := response.Error(err.Error())
+			c.JSON(404 , response)
+			return
+		}
 
-// }
-// func (t *taskController) Destroy(c *gin.Context) {
+		response := response.Success("task updated successfully", res)
+		c.JSON(200, response)
+	}
 
-// 	id := c.Param("id")
-// 	result :=t.connection.Delete(&model.Task{}, id)
-// 	if result.RowsAffected == 0 {
-// 		c.JSON(404, gin.H{
-// 			"message": "the task does not exist",
-// 		})
-// 	} else {
-// 	c.JSON(200, gin.H{
-// 		"message": "Task deleted succesfully",
-// 	})
-//     }
-// }
+}
+
+func (t *taskController) Destroy(c *gin.Context) {
+
+	id := c.Param("id")
+	userId := t.getIdFromHeader(c)
+
+
+	err  := t.taskService.DeleteTask(id , userId)
+	if err != nil {
+		response := response.Error(err.Error())
+		c.JSON(404 , response)
+		return
+	}
+	
+	response := response.Message("task deleted successfully")
+	c.JSON(200, response)
+}
 
 func (c *taskController) getIdFromHeader(ctx *gin.Context) string {
 	header := ctx.GetHeader("Authorization")

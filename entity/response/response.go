@@ -11,6 +11,10 @@ type errorResponse struct {
 	Status  bool        `json:"status"`
 	Error  string       `json:"error"`
 }
+type messageResponse struct {
+	Status  bool        `json:"status"`
+	Message  string       `json:"message"`
+}
 
 
 func Error( err string) errorResponse {
@@ -25,5 +29,11 @@ func Success(message string , data interface{}) successResponse {
 		Status: true,
 		Message: message,
 		Data: data,
+	}
+ }
+ func Message(message string) messageResponse {
+	return 	messageResponse{
+		Status: true,
+		Message: message,
 	}
  }
