@@ -2,15 +2,16 @@ package controller
 
 import (
 	"fmt"
+	"net/http"
 
-
+	
+	"github.com/aminyasser/todo-list/entity/request"
 	"github.com/aminyasser/todo-list/entity/response"
 	"github.com/aminyasser/todo-list/service"
 	"github.com/dgrijalva/jwt-go"
 
 	"github.com/gin-gonic/gin"
 )
-
 
 type TaskController interface {
 	Index(c *gin.Context)
@@ -23,57 +24,53 @@ type TaskController interface {
 type taskController struct {
 	taskService service.TaskService
 	jwtService  service.JWTService
-} 
+}
 
 func NewTaskController(taskService service.TaskService, jwtService service.JWTService) *taskController {
-   return &taskController{taskService, jwtService}
+	return &taskController{taskService, jwtService}
 }
-
 
 func (t *taskController) Index(c *gin.Context) {
-    
-    id := t.getIdFromHeader(c)
-	result , err := t.taskService.GetAll(id)
+
+	id := t.getIdFromHeader(c)
+	result, err := t.taskService.GetAll(id)
 	if err != nil {
 		response := response.Error(err.Error())
-		c.JSON( 401 , response)
+		c.JSON(401, response)
 		return
 	}
-    res := response.Success("Success" , result)
+	res := response.Success("Success", result)
 	c.JSON(200, res)
 }
-
 
 func (t *taskController) Show(c *gin.Context) {
 	id := c.Param("id")
-	
-	result , err := t.taskService.Get(id)
+
+	result, err := t.taskService.Get(id)
 	if err != nil {
 		response := response.Error(err.Error())
-		c.JSON( 401 , response)
+		c.JSON(401, response)
 		return
 	}
 
-	res := response.Success("Success" , result)
+	res := response.Success("Success", result)
 	c.JSON(200, res)
 }
 
+func (t *taskController) Create(c *gin.Context) {
+	var task request.Task
+	err := c.ShouldBindJSON(&task)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	} else {
+		id := t.getIdFromHeader(c)
+		res , _ := t.taskService.CreateTask(task , id)
 
-// func (t *taskController) Create(c *gin.Context) {
-// 	var task response.Task
-//     err := c.ShouldBindJSON(&task)
-// 	if err != nil {
-// 		c.JSON(http.StatusBadRequest, gin.H{"error" : err.Error()})
-// 	} else {
-//        t.connection.Create(&model.Task{Body: task.Body , Completed: task.Completed })
+		response := response.Success("task created successfully", res)
+		c.JSON(200, response)
+	}
+}
 
-// 		c.JSON(200, gin.H{
-// 			"message": "Task created successfully",
-// 			"task": task,
-// 	    })
-// 	}
-   
-// }
 // func (t *taskController) Update(c *gin.Context) {
 // 	id := c.Param("id")
 // 	var task response.Task
@@ -87,7 +84,7 @@ func (t *taskController) Show(c *gin.Context) {
 // 			"task": task,
 // 		})
 // 	}
-	
+
 // }
 // func (t *taskController) Destroy(c *gin.Context) {
 
@@ -101,7 +98,7 @@ func (t *taskController) Show(c *gin.Context) {
 // 	c.JSON(200, gin.H{
 // 		"message": "Task deleted succesfully",
 // 	})
-//     } 
+//     }
 // }
 
 func (c *taskController) getIdFromHeader(ctx *gin.Context) string {
